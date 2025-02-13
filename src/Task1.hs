@@ -34,7 +34,7 @@ validate n = luhn (toDigits (n `div` 10)) == fromIntegral (n `mod` 10)
 -- 1
 
 luhn :: [Int] -> Int
-luhn d = (\n -> (10 - (n `mod` 10)) `mod` 10) (sum (map normalize (doubleEveryOtherLast d)))
+luhn list = (\n -> (10 - (n `mod` 10)) `mod` 10) (sum (map normalize (doubleEveryOtherLast list)))
 
 -----------------------------------
 --

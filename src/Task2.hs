@@ -12,7 +12,7 @@ import Prelude hiding (reverse, map, filter, sum, foldl, foldr, length, head, ta
 -- You can reuse already implemented functions from Task1
 -- by listing them in this import clause
 -- NOTE: only listed functions are imported, everything else remains hidden
-import Task1 (reverse, map, sum)
+import Task1 (reverse, map, sum, doubleEveryOtherLast, toDigits)
 
 -----------------------------------
 --
@@ -25,7 +25,7 @@ import Task1 (reverse, map, sum)
 -- 1
 
 luhnModN :: Int -> (a -> Int) -> [a] -> Int
-luhnModN = error "TODO: define luhnModN"
+luhnModN m f list = (\s -> (m - (s `mod` m)) `mod` m) (sum (map (normalizeN m) (doubleEveryOtherLast (map f list))))
 
 -----------------------------------
 --
@@ -37,7 +37,7 @@ luhnModN = error "TODO: define luhnModN"
 -- 1
 
 luhnDec :: [Int] -> Int
-luhnDec = error "TODO: define luhnDec"
+luhnDec = luhnModN 10 id
 
 -----------------------------------
 --
@@ -49,7 +49,7 @@ luhnDec = error "TODO: define luhnDec"
 -- 15
 
 luhnHex :: [Char] -> Int
-luhnHex = error "TODO: define luhnHex"
+luhnHex = luhnModN 16 digitToInt
 
 -----------------------------------
 --
@@ -65,7 +65,11 @@ luhnHex = error "TODO: define luhnHex"
 -- [10,11,12,13,14,15]
 
 digitToInt :: Char -> Int
-digitToInt = error "TODO: define digitToInt"
+digitToInt ch
+    | ch >= '0' && ch <= '9' = fromEnum ch - fromEnum '0'
+    | ch >= 'a' && ch <= 'f' = fromEnum ch - fromEnum 'a' + 10
+    | ch >= 'A' && ch <= 'F' = fromEnum ch - fromEnum 'A' + 10
+    | otherwise = error "Invalid hexadecimal digit"
 
 -----------------------------------
 --
@@ -82,7 +86,7 @@ digitToInt = error "TODO: define digitToInt"
 -- False
 
 validateDec :: Integer -> Bool
-validateDec = error "TODO: define validateDec"
+validateDec n = luhnDec (toDigits (n `div` 10)) == fromIntegral (n `mod` 10) 
 
 -----------------------------------
 --
@@ -99,4 +103,58 @@ validateDec = error "TODO: define validateDec"
 -- False
 
 validateHex :: [Char] -> Bool
-validateHex = error "TODO: define validateHex"
+validateHex list = luhnHex (dropLastElem list) == digitToInt (getLastElem list)
+
+
+-----------------------------------
+--
+-- Generic function for getting the last elem in the list 
+--
+-- Usage example:
+--
+-- >>> getLastElem  "abc"
+-- 'c'
+-- >>> getLastElem [1, 2, 3]
+-- 3
+
+getLastElem :: [a] -> a
+getLastElem []     = error "List is empty"
+getLastElem [x]    = x 
+getLastElem (_:xs) = getLastElem xs 
+
+
+-----------------------------------
+--
+-- Generic function for dropping the last elem in the list 
+--
+-- Usage example:
+--
+-- >>> dropLastElem  "abc"
+-- "ab"
+-- >>> dropLastElem [1, 2, 3]
+-- [1, 2]
+
+dropLastElem :: [a] -> [a]
+dropLastElem []     = error "List is empty"
+dropLastElem [_]    = [] 
+dropLastElem (x:xs) = x : dropLastElem xs 
+
+
+-----------------------------------
+--
+-- Normalizes given number to single digit by subtracting N-1
+-- if it is greater than or equal to N
+--
+--
+-- Usage example:
+--
+-- >>> normalizeN 10 12
+-- 3
+-- >>> normalizeN 16 24
+-- 9
+
+normalizeN :: Int -> Int -> Int
+normalizeN m n
+    | n >= m     = n - (m - 1)
+    | otherwise  = n
+
