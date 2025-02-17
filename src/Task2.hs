@@ -12,7 +12,7 @@ import Prelude hiding (reverse, map, filter, sum, foldl, foldr, length, head, ta
 -- You can reuse already implemented functions from Task1
 -- by listing them in this import clause
 -- NOTE: only listed functions are imported, everything else remains hidden
-import Task1 (reverse, map, sum, doubleEveryOtherLast, toDigits)
+import Task1 (reverse, map, sum, doubleEveryOtherLast, toDigits, calc)
 
 -----------------------------------
 --
@@ -25,7 +25,7 @@ import Task1 (reverse, map, sum, doubleEveryOtherLast, toDigits)
 -- 1
 
 luhnModN :: Int -> (a -> Int) -> [a] -> Int
-luhnModN m f list = (\s -> (m - (s `mod` m)) `mod` m) (sum (map (normalizeN m) (doubleEveryOtherLast (map f list))))
+luhnModN m f list = calc m (sum (map (normalizeN m) (doubleEveryOtherLast (map f list))))
 
 -----------------------------------
 --
@@ -86,7 +86,7 @@ digitToInt ch
 -- False
 
 validateDec :: Integer -> Bool
-validateDec n = luhnDec (toDigits (n `div` 10)) == fromIntegral (n `mod` 10) 
+validateDec n = luhnDec (init (toDigits n)) == fromIntegral (last (toDigits n))
 
 -----------------------------------
 --
@@ -103,7 +103,7 @@ validateDec n = luhnDec (toDigits (n `div` 10)) == fromIntegral (n `mod` 10)
 -- False
 
 validateHex :: [Char] -> Bool
-validateHex list = luhnHex (dropLastElem list) == digitToInt (getLastElem list)
+validateHex list = luhnHex (init list) == digitToInt (last list)
 
 
 -----------------------------------
@@ -112,15 +112,15 @@ validateHex list = luhnHex (dropLastElem list) == digitToInt (getLastElem list)
 --
 -- Usage example:
 --
--- >>> getLastElem  "abc"
+-- >>> last  "abc"
 -- 'c'
--- >>> getLastElem [1, 2, 3]
+-- >>> last [1, 2, 3]
 -- 3
 
-getLastElem :: [a] -> a
-getLastElem []     = error "List is empty"
-getLastElem [x]    = x 
-getLastElem (_:xs) = getLastElem xs 
+last :: [a] -> a
+last []     = error "List is empty"
+last [x]    = x 
+last (_:xs) = last xs 
 
 
 -----------------------------------
@@ -129,15 +129,15 @@ getLastElem (_:xs) = getLastElem xs
 --
 -- Usage example:
 --
--- >>> dropLastElem  "abc"
+-- >>> init  "abc"
 -- "ab"
--- >>> dropLastElem [1, 2, 3]
+-- >>> init [1, 2, 3]
 -- [1, 2]
 
-dropLastElem :: [a] -> [a]
-dropLastElem []     = error "List is empty"
-dropLastElem [_]    = [] 
-dropLastElem (x:xs) = x : dropLastElem xs 
+init :: [a] -> [a]
+init []     = error "List is empty"
+init [_]    = [] 
+init (x:xs) = x : init xs 
 
 
 -----------------------------------
